@@ -1,7 +1,7 @@
 from string import *
 import re
 #gets input from user
-print "Path to library to stripped."
+print "Path to library to be stripped."
 lib_path = str(raw_input())
 print "Path to your html file"
 classes_path = str(raw_input())
