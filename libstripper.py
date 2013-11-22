@@ -87,5 +87,4 @@ def strip_library(lib_path,classes):
     output.close()
     return
 classes= strip_classes(classes_path)
-print classes
 strip_library(lib_path,classes)
