@@ -1,6 +1,6 @@
 Libstripper
 ===========
-A handy command line tool for stripping a css library of the things you don't use.
+If you only use bootstrap buttons, why are you loading all 7000 lines? Libstripper is a commandline tool that strips away unused css from a library.
 
 Installation
 ============
