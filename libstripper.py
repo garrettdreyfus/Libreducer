@@ -1,11 +1,8 @@
 from string import *
 import re
-#gets input from user
-print "Path to library to be stripped."
-lib_path = str(raw_input())
-print "Path to your html file"
-classes_path = str(raw_input())
+import optparse
 def strip_element(line):
+    #uses regex to strip element
     match = re.search(r'<.*?\b\w+\b', line)
     if match:
         element = match.group()
@@ -14,6 +11,7 @@ def strip_element(line):
         return element
     return None
 def strip_id(line):
+    #uses regex to strip id
     match = re.search(r' id.*?=.*?\"(.+?)\"',line)
     if match:
         element = match.group()
@@ -22,6 +20,7 @@ def strip_id(line):
         return element
     return None
 def strip_class(line):
+    #uses regex to strip id
     match = re.search(r' class.*?=.*?\"(.+?)\"',line)
     if match:
         element = match.group()
@@ -35,17 +34,19 @@ def strip_classes(classes_path):
     for line in class_file:
         if '<' in line:
             element = strip_element(line)
-            if element not in classes: classes.append(element)
+            if element not in classes: classes.append(element) #to deal with dupes
             if 'class' in line:
                 stripped_class = strip_class(line)
                 if ' ' in stripped_class:
+                    #if the lines in the form of class="alert alert-danger" for instance
                     stripped_class=stripped_class.split()
                     for word in stripped_class: 
-                        if word not in classes: classes.append(word)
+                        if word not in classes: classes.append(word) #to deal with dupes
                 elif stripped_class not in classes: classes.append(stripped_class)
             if 'id' in line:
                 stripped_id = strip_id(line)
-                if stripped_id not in classes: classes.append(stripped_id)
+                if stripped_id not in classes: classes.append(stripped_id) #to deal with dupes
+
     return classes
 def strip_library(lib_path,classes):
     output = open(lib_path[:-4]+"-stripped.css",'w')
@@ -86,5 +87,48 @@ def strip_library(lib_path,classes):
                 bracket_count-=class_line.count('}')
     output.close()
     return
-classes= strip_classes(classes_path)
-strip_library(lib_path,classes)
+def consolidate(list_of_lists):
+    #consolidates a list_of_lists into a list
+    classes = []
+    classes = set(classes)
+    for lis in list_of_lists:
+        lis = set(lis)
+        classes = classes.union(lis)
+    return list(classes)
+def main():
+    optionparser = optparse.OptionParser()    
+    optionparser.add_option('--html')    
+    optionparser.add_option('--css')    
+    optionparser.add_option('--dir')    
+    options, arguments = optionparser.parse_args()
+    if options.html and options.css and not options.dir:
+        if options.html[-4:] == 'html' and options.css[-3:] == 'css':
+            classes= strip_classes(options.html)
+            strip_library(options.css,classes)
+            print "success"
+            return
+        else: 
+            print "Your file path was invalid"
+            return
+
+    if options.dir and options.css and not options.html:
+        import os
+        directory = options.dir
+        list_of_classes = []
+        for root, dirs, filenames in os.walk(directory):
+            for f in filenames:
+                if f[-4:]=='html':
+                    if directory[-1] == '/': list_of_classes.append(strip_classes(directory+f))
+                    else: list_of_classes.append(strip_classes(directory+'/'+f))
+        strip_library(options.css,consolidate(list_of_classes))
+        return
+        
+    else:
+        if options.html and options.css and options.dir:
+            print "You must either have html and css specified, or dir and css specified. Not both."
+            return
+        else: 
+            print "You must either have html and css specified, or dir and css specified."
+            return
+if __name__ == '__main__':
+    main()
