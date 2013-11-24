@@ -20,3 +20,5 @@ You have two options when using libstripper
 
 Your stripped css file will be stored in the same directory as your css file but with -stripped appended. For instance bootstrap.css becomes bootstrap-stripped.css.
 
+You can also minimize it after with
+```--min True```
